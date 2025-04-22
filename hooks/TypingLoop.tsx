@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Text } from 'react-native';
 const TypingLoop = ({
   text = "Carregando mídias",
-  speed = 40,
+  speed = 60,
   delay = 80,
   style
 }: any)  => {

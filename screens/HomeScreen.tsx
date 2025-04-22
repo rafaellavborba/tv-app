@@ -17,19 +17,41 @@ import { fetchImages, fetchVideos } from '@/store/requestsActions';
 import { AppDispatch } from '@/store/store';
 import { useMedias } from '@/hooks/useMedias';
 import TypingLoop from '@/hooks/TypingLoop';
-const { height, width } = Dimensions.get('window');
+import {Animated} from 'react-native'
 export default function HomeScreen() {
   const [focusedButton, setFocusedButton] = useState(null);
   const navigation = useNavigation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const {mediaList, currentIndex, loading, setCurrentIndex, setLoading, setMediaList, syncAndCleanMedia, getAllSavedMedia} = useMedias()
+  const {mediaList, 
+      currentIndex, 
+      loading, 
+      setCurrentIndex, 
+      setLoading, 
+      setMediaList, 
+      syncAndCleanMedia, 
+      getAllSavedMedia, 
+      downloadProgress 
+    } = useMedias()
+
   useEffect(() => {
     setFocusedButton('play');
   }, []);
+
   const handleOpenPasswordModal = () => {
     setShowPasswordModal(true);
   };
+
+  const progressAnim = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+      Animated.timing(progressAnim, {
+          toValue: downloadProgress,
+          duration: 100,
+          useNativeDriver: false,
+      }).start();
+  }, [downloadProgress]);
+
   useEffect(() => {
     const loadMedia = async () => {
       try {
@@ -41,17 +63,7 @@ export default function HomeScreen() {
           ...videoRes.payload.map((vid: any) => vid.url)
         ];
         const localUris = await syncAndCleanMedia(allUrls);
-        const images = imageRes.payload.map((img: any) => {
-          const filename = img.url.split('filename=').pop();
-          const localUri = `${FileSystem.documentDirectory}${filename}`;
-          return { ...img, type: 'image', localUri };
-        });
-        const videos = videoRes.payload.map((vid: any) => {
-          const filename = vid.url.split('?').pop();
-          const localUri = `${FileSystem.documentDirectory}${filename}`;
-          return { ...vid, type: 'video', localUri };
-        });
-        setMediaList([...images, ...videos]);
+        
       } catch (error) {
         console.error("Erro ao carregar mídias:", error);
       } finally {
@@ -72,31 +84,47 @@ export default function HomeScreen() {
       })
       .catch((err) => console.error('Erro ao abrir o AnyDesk:', err));
   };
+
   const navigateToProgram = () => {
     navigation.navigate('MediaScreen');
   };
+
+  const width = progressAnim.interpolate({
+      inputRange: [0, 100],
+      outputRange: ['0%', '100%'],
+  });
+  
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
+          nativeID={"1"}
+          nextFocusDown={2}
+          nextFocusLeft={3}
+          nextFocusRight={2}
+          nextFocusUp={2}
           onPress={handleOpenPasswordModal}
-          onPressIn={() => setFocusedButton('logout')}
-          onPressOut={() => setFocusedButton(false)}
+          onFocus={() => setFocusedButton('logout')}
           style={[styles.logoutButton, focusedButton === 'logout' && styles.buttonFocus]} 
           accessibilityRole="button" 
           accessibilityLabel="Clique aqui para sair da aplicação"
         >
           <Image source={require('../assets/icon/logout.png')} style={styles.iconLogout} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
           <View style={styles.buttons}>
             
             <TouchableOpacity 
+              nativeID={"2"}
+              nextFocusUp={3}
+              nextFocusRight={3}
+              nextFocusLeft={3}
+              nextFocusDown={3}
               style={[styles.button, styles.firstButton, focusedButton === 'play' && styles.buttonFocus]} 
               onPress={navigateToProgram} 
-              onPressIn={() => setFocusedButton('play')}
-              onPressOut={() => setFocusedButton(null)}
+              onFocus={() => setFocusedButton('play')}
+              hasTVPreferredFocus={true}
                 disabled={loading}
             >
               <Image 
@@ -107,24 +135,28 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>Iniciar Programação</Text>
             </TouchableOpacity>
             <TouchableOpacity 
+              nativeID={"3"}
+              nextFocusRight={2}
+              nextFocusLeft={2}
+              nextFocusDown={2}
+              nextFocusUp={2}
               style={[styles.button, focusedButton === 'support' && styles.buttonFocus]} 
               onPress={openAnyDesk} 
-              onPressIn={() => setFocusedButton('support')}
-              onPressOut={() => setFocusedButton(false)}
+              onFocus={() => setFocusedButton('support')}
             >
               <Image 
                 source={require('../assets/icon/support.png')} 
                 style={styles.buttonIcon} 
+                resizeMode="contain" 
                 accessibilityLabel="Clique aqui para acessar o suporte"
               />
               <Text style={styles.buttonText}>Suporte</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <Image source={require('../assets/icon/borelli.png')} style={styles.logoIcon} />
-        {loading ? (
-          <TypingLoop style={styles.loadingMedias} />
-        ) : null}
+        <Image source={require('../assets/icon/borelli.png')} style={styles.logoIcon} resizeMode="cover"  />
+        {(loading && <TypingLoop style={styles.loadingMedias} />
+        ) }
       </ImageBackground>
       {showPasswordModal 
         ? (<ModalPassword showPasswordModal={showPasswordModal} setShowPasswordModal={setShowPasswordModal}/> ) 
@@ -154,8 +186,8 @@ const styles = StyleSheet.create({
     opacity: 1
  },
 content: {
-  maxHeight: height,
-  maxWidth: width,
+  maxHeight: '100vh',
+  maxWidth: '100vw',
   flex: 1,
   justifyContent: 'center',
   alignItems: 'center',
@@ -164,9 +196,7 @@ title: {
   fontSize: 36,
   fontWeight: 'bold',
   color: '#384c29',
-  textShadowColor: 'rgba(0, 0, 0, 0.2)',
-  textShadowOffset: { width: 2, height: 4 },
-  textShadowRadius: 8,
+  textShadow: 'color offsetX offsetY blurRadius',
 },
 logoutButton: {
   position: 'absolute',
@@ -202,7 +232,6 @@ button: {
 buttonIcon: {
   height: 54,
   width: 54,
-  resizeMode: 'contain',
   marginBottom: 18
 },
 buttonText: {
@@ -220,12 +249,21 @@ logoIcon: {
   right: 40,
   height: 100,
   width:100,
-  resizeMode: 'cover',
 },
 loadingMedias: {
   position: 'absolute',
   bottom: 40,
   color: '#836977',
   fontWeight: 'bold',
+},
+container: {
+  position: 'fixed',
+  padding: 20,
+  width: 280,
+  bottom: 100
+},
+textLoading: {
+  color: '#836977',
+  fontWeight: 'bold'
 }
 });

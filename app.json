@@ -3,7 +3,7 @@
     "name": "tv-app",
     "slug": "tv-app",
     "version": "1.0.0",
-    "orientation": "landscape",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
@@ -30,10 +30,11 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 500,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+        
       ],
       "react-native-video"
     ],
