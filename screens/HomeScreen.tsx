@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -7,10 +7,10 @@ import {
   Linking, 
   Alert, 
   ImageBackground, 
-  Image,
+  Image
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import ModalPassword from '@/components/ModalPassword';
+// import ModalPassword from '@/components/ModalPassword';
 import * as FileSystem from 'expo-file-system';
 import { useDispatch } from "react-redux";
 import { fetchImages, fetchVideos } from '@/store/requestsActions';
@@ -18,6 +18,7 @@ import { AppDispatch } from '@/store/store';
 import { useMedias } from '@/hooks/useMedias';
 import TypingLoop from '@/hooks/TypingLoop';
 import {Animated} from 'react-native'
+
 export default function HomeScreen() {
   const [focusedButton, setFocusedButton] = useState(null);
   const navigation = useNavigation();
@@ -72,6 +73,7 @@ export default function HomeScreen() {
     };
     loadMedia();
   }, [dispatch]);
+
   const openAnyDesk = () => {
     const anydeskURL = 'anydesk://';
     Linking.canOpenURL(anydeskURL)
@@ -89,11 +91,7 @@ export default function HomeScreen() {
     navigation.navigate('MediaScreen');
   };
 
-  const width = progressAnim.interpolate({
-      inputRange: [0, 100],
-      outputRange: ['0%', '100%'],
-  });
-  
+
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
@@ -158,10 +156,10 @@ export default function HomeScreen() {
         {(loading && <TypingLoop style={styles.loadingMedias} />
         ) }
       </ImageBackground>
-      {showPasswordModal 
+      {/* {showPasswordModal 
         ? (<ModalPassword showPasswordModal={showPasswordModal} setShowPasswordModal={setShowPasswordModal}/> ) 
         : null
-      }
+      } */}
     </View>
   );
 }

@@ -35,7 +35,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "react-native-video"
+      "react-native-video",
+      "@react-native-tvos/config-tv"
     ],
     "experiments": {
       "typedRoutes": true
