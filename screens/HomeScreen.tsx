@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -7,17 +7,17 @@ import {
   Linking, 
   Alert, 
   ImageBackground, 
-  Image
+  Image,
+  findNodeHandle,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import ModalPassword from '@/components/ModalPassword';
-import * as FileSystem from 'expo-file-system';
 import { useDispatch } from "react-redux";
 import { fetchImages, fetchVideos } from '@/store/requestsActions';
 import { AppDispatch } from '@/store/store';
 import { useMedias } from '@/hooks/useMedias';
 import TypingLoop from '@/hooks/TypingLoop';
-import {Animated} from 'react-native'
+// import {Animated} from 'react-native'
 
 export default function HomeScreen() {
   const [focusedButton, setFocusedButton] = useState(null);
@@ -25,33 +25,34 @@ export default function HomeScreen() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const {mediaList, 
-      currentIndex, 
-      loading, 
-      setCurrentIndex, 
-      setLoading, 
-      setMediaList, 
-      syncAndCleanMedia, 
-      getAllSavedMedia, 
-      downloadProgress 
-    } = useMedias()
+    currentIndex, 
+    loading, 
+    setCurrentIndex, 
+    setLoading, 
+    setMediaList, 
+    syncAndCleanMedia, 
+    getAllSavedMedia, 
+    downloadProgress 
+  } = useMedias()
 
   useEffect(() => {
     setFocusedButton('play');
   }, []);
 
-  const handleOpenPasswordModal = () => {
-    setShowPasswordModal(true);
-  };
+  // const handleOpenPasswordModal = () => {
+  //   setShowPasswordModal(true);
+  // };
+  const playButtonRef = useRef<TouchableOpacity>(null);
+  const supportButtonRef = useRef<TouchableOpacity>(null);
+  // const progressAnim = useState(new Animated.Value(0))[0];
 
-  const progressAnim = useState(new Animated.Value(0))[0];
-
-  useEffect(() => {
-      Animated.timing(progressAnim, {
-          toValue: downloadProgress,
-          duration: 100,
-          useNativeDriver: false,
-      }).start();
-  }, [downloadProgress]);
+  // useEffect(() => {
+  //     Animated.timing(progressAnim, {
+  //         toValue: downloadProgress,
+  //         duration: 100,
+  //         useNativeDriver: false,
+  //     }).start();
+  // }, [downloadProgress]);
 
   useEffect(() => {
     const loadMedia = async () => {
@@ -91,6 +92,13 @@ export default function HomeScreen() {
     navigation.navigate('MediaScreen');
   };
 
+  const getNodeHandle = (ref: React.RefObject<View>): number | undefined => findNodeHandle(ref.current) ?? undefined;
+
+  const handleKeyPress = (e: any, item: any) => {
+    if(!e) return
+    const { eventKeyAction, eventType } = e;
+    setFocusedButton(item)
+  }
 
   return (
     <View style={styles.content}>
@@ -114,16 +122,18 @@ export default function HomeScreen() {
           <View style={styles.buttons}>
             
             <TouchableOpacity 
+              ref={playButtonRef}
               nativeID={"2"}
-              nextFocusUp={3}
-              nextFocusRight={3}
-              nextFocusLeft={3}
-              nextFocusDown={3}
+              nextFocusUp={getNodeHandle(supportButtonRef)}
+              nextFocusRight={getNodeHandle(supportButtonRef)}
+              nextFocusLeft={getNodeHandle(supportButtonRef)}
+              nextFocusDown={getNodeHandle(supportButtonRef)}
               style={[styles.button, styles.firstButton, focusedButton === 'play' && styles.buttonFocus]} 
               onPress={navigateToProgram} 
               onFocus={() => setFocusedButton('play')}
               hasTVPreferredFocus={true}
-                disabled={loading}
+              disabled={loading}
+              onKeyPress={(e:any) => handleKeyPress(e, 'play')}
             >
               <Image 
                 source={require('../assets/icon/button_play.png')} 
@@ -133,14 +143,16 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>Iniciar Programação</Text>
             </TouchableOpacity>
             <TouchableOpacity 
+             ref={supportButtonRef}
               nativeID={"3"}
-              nextFocusRight={2}
-              nextFocusLeft={2}
-              nextFocusDown={2}
-              nextFocusUp={2}
+              nextFocusRight={getNodeHandle(playButtonRef)}
+              nextFocusLeft={getNodeHandle(playButtonRef)}
+              nextFocusDown={getNodeHandle(playButtonRef)}
+              nextFocusUp={getNodeHandle(playButtonRef)}
               style={[styles.button, focusedButton === 'support' && styles.buttonFocus]} 
               onPress={openAnyDesk} 
               onFocus={() => setFocusedButton('support')}
+              onKeyPress={(e:any) => handleKeyPress(e, 'support')}
             >
               <Image 
                 source={require('../assets/icon/support.png')} 
@@ -226,6 +238,7 @@ button: {
   alignItems: 'center',
   justifyContent: 'center',
   elevation: 4,
+  opacity: 0.5
 },
 buttonIcon: {
   height: 54,
@@ -237,9 +250,8 @@ buttonText: {
   fontSize: 18,
 },
 buttonFocus: {
-  borderColor: '#C59D58', 
-  borderWidth: 2,
   elevation: 5,
+  opacity: 1
 },
 logoIcon: {
   position: 'absolute',
