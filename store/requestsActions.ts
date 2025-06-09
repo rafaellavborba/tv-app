@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { setImages, setVideos } from "./requestsSlice";
+import { setImages, setVideos, setDevice } from "./requestsSlice";
 interface fetchMediaError {
     message: 'string'
 }
@@ -49,3 +49,20 @@ export const fetchVideos = createAsyncThunk<any, string, { rejectValue: fetchMed
         }
     }
 )   
+export const fetchDevice = createAsyncThunk<any, any, {rejectValue: fetchMediaError}>(
+    "fetchDevice", 
+    async(device, {dispatch, rejectValue}) => {
+        try {
+            const {data} = await axios.post(`https://apiptv.gelatoborelli.com.br/api/device_tv`, device, {
+                headers: {
+                    Authorization: "ee6d9123-3f88-4175-829f-6d08ca8810b8",
+                },
+            })
+            if (data) {
+                dispatch(setDevice(device.identifier))
+            }
+        } catch (error) {
+            console.error('Erro ao identificar o device: ', error)
+        }
+    }
+)

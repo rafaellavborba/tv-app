@@ -39,7 +39,6 @@
     "expo-system-ui": "~4.0.9",
     "expo-web-browser": "~14.0.2",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
     "react-native": "npm:react-native-tvos@latest",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "~3.16.1",
@@ -47,9 +46,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-tvos-controller": "^0.2.4",
     "react-native-video": "^6.12.0",
-    "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "expo-device": "~7.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

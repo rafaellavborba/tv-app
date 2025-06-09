@@ -42,8 +42,6 @@ export default function HomeScreen() {
   // const handleOpenPasswordModal = () => {
   //   setShowPasswordModal(true);
   // };
-  const playButtonRef = useRef<TouchableOpacity>(null);
-  const supportButtonRef = useRef<TouchableOpacity>(null);
   // const progressAnim = useState(new Animated.Value(0))[0];
 
   // useEffect(() => {
@@ -92,13 +90,6 @@ export default function HomeScreen() {
     navigation.navigate('MediaScreen');
   };
 
-  const getNodeHandle = (ref: React.RefObject<View>): number | undefined => findNodeHandle(ref.current) ?? undefined;
-
-  const handleKeyPress = (e: any, item: any) => {
-    if(!e) return
-    const { eventKeyAction, eventType } = e;
-    setFocusedButton(item)
-  }
 
   return (
     <View style={styles.content}>
@@ -122,18 +113,11 @@ export default function HomeScreen() {
           <View style={styles.buttons}>
             
             <TouchableOpacity 
-              ref={playButtonRef}
-              nativeID={"2"}
-              nextFocusUp={getNodeHandle(supportButtonRef)}
-              nextFocusRight={getNodeHandle(supportButtonRef)}
-              nextFocusLeft={getNodeHandle(supportButtonRef)}
-              nextFocusDown={getNodeHandle(supportButtonRef)}
               style={[styles.button, styles.firstButton, focusedButton === 'play' && styles.buttonFocus]} 
               onPress={navigateToProgram} 
               onFocus={() => setFocusedButton('play')}
               hasTVPreferredFocus={true}
               disabled={loading}
-              onKeyPress={(e:any) => handleKeyPress(e, 'play')}
             >
               <Image 
                 source={require('../assets/icon/button_play.png')} 
@@ -143,16 +127,9 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>Iniciar Programação</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-             ref={supportButtonRef}
-              nativeID={"3"}
-              nextFocusRight={getNodeHandle(playButtonRef)}
-              nextFocusLeft={getNodeHandle(playButtonRef)}
-              nextFocusDown={getNodeHandle(playButtonRef)}
-              nextFocusUp={getNodeHandle(playButtonRef)}
               style={[styles.button, focusedButton === 'support' && styles.buttonFocus]} 
               onPress={openAnyDesk} 
               onFocus={() => setFocusedButton('support')}
-              onKeyPress={(e:any) => handleKeyPress(e, 'support')}
             >
               <Image 
                 source={require('../assets/icon/support.png')} 
