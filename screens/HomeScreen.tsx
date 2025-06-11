@@ -9,6 +9,7 @@ import {
   ImageBackground, 
   Image,
   findNodeHandle,
+  Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import ModalPassword from '@/components/ModalPassword';
@@ -18,39 +19,52 @@ import { AppDispatch } from '@/store/store';
 import { useMedias } from '@/hooks/useMedias';
 import TypingLoop from '@/hooks/TypingLoop';
 // import {Animated} from 'react-native'
+import { Button } from '@/components/ui/Button';
+import { AccessibilityInfo } from 'react-native';
+import KeyEvent from 'react-native-keyevent';
+
 
 export default function HomeScreen() {
-  const [focusedButton, setFocusedButton] = useState(null);
+
+  AccessibilityInfo.addEventListener('focusChanged', (isFocused) => {
+    console.log('Focus changed:', isFocused);
+  });
   const navigation = useNavigation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const {mediaList, 
-    currentIndex, 
-    loading, 
-    setCurrentIndex, 
-    setLoading, 
-    setMediaList, 
-    syncAndCleanMedia, 
-    getAllSavedMedia, 
-    downloadProgress 
-  } = useMedias()
+    const [focusedIndex, setFocusedIndex] = useState(0);
 
   useEffect(() => {
-    setFocusedButton('play');
-  }, []);
+    KeyEvent.onKeyDownListener((keyEvent) => {
+      if (keyEvent.keyCode === 22) {
+        // Direita
+        setFocusedIndex((prev) => (prev + 1) % 2);
+      } else if (keyEvent.keyCode === 21) {
+        // Esquerda
+        setFocusedIndex((prev) => (prev - 1 + 2) % 2);
+      } else if (keyEvent.keyCode === 23) {
+        // Enter / OK
+        if (focusedIndex === 0) {
+          console.log('Play pressionado');
+        } else {
+          console.log('Suporte pressionado');
+        }
+      }
+    });
+
+    return () => KeyEvent.removeKeyDownListener();
+  }, [focusedIndex]);
+  const {
+    loading,  
+    setLoading, 
+    syncAndCleanMedia, 
+  } = useMedias()
+
 
   // const handleOpenPasswordModal = () => {
   //   setShowPasswordModal(true);
   // };
-  // const progressAnim = useState(new Animated.Value(0))[0];
 
-  // useEffect(() => {
-  //     Animated.timing(progressAnim, {
-  //         toValue: downloadProgress,
-  //         duration: 100,
-  //         useNativeDriver: false,
-  //     }).start();
-  // }, [downloadProgress]);
 
   useEffect(() => {
     const loadMedia = async () => {
@@ -91,6 +105,20 @@ export default function HomeScreen() {
   };
 
 
+  const playButtonRef = useRef(null);
+  const supportButtonRef = useRef(null);
+
+// const checkFocus = () => {
+//     const focusedField = TextInput.State.currentlyFocusedField();
+//     const playHandle = findNodeHandle(playButtonRef.current);
+//     const supportHandle = findNodeHandle(supportButtonRef.current);
+  
+//   };
+
+  // useEffect(() => {
+  //   const interval = setInterval(checkFocus, 1000); 
+  //   return () => clearInterval(interval);
+  // }, []);
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
@@ -102,7 +130,7 @@ export default function HomeScreen() {
           nextFocusUp={2}
           onPress={handleOpenPasswordModal}
           onFocus={() => setFocusedButton('logout')}
-          style={[styles.logoutButton, focusedButton === 'logout' && styles.buttonFocus]} 
+          
           accessibilityRole="button" 
           accessibilityLabel="Clique aqui para sair da aplicação"
         >
@@ -110,49 +138,22 @@ export default function HomeScreen() {
         </TouchableHighlight > */}
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
-          <View style={styles.buttons}>
-            
-            <TouchableHighlight 
-              style={[
-                styles.button,
-                styles.firstButton,
-                focusedButton === 'play' && styles.buttonFocus
-              ]}
-              onPress={navigateToProgram}
-              onFocus={() => setFocusedButton('play')}
-              hasTVPreferredFocus={true}
-              
-              disabled={loading}
-              focusable={true}
-            >
-              <View>
-                <Image
-                  source={require('../assets/icon/button_play.png')}
-                  style={styles.buttonIcon}
-                  accessibilityLabel="Iniciar a produção"
-                />
-                <Text>{focusedButton === 'play' ? 'FOCADO' : 'NÃO FOCADO'}</Text>
-                {/* <Text style={styles.buttonText}>Iniciar Programação</Text> */}
-              </View>
-            </TouchableHighlight >
-            <TouchableHighlight
-              style={[styles.button, focusedButton === 'support' && styles.buttonFocus]} 
-              onPress={openAnyDesk} 
-              onFocus={() => console.log('oii')}
-              focusable={true}
-            >
-              <View>
-                <Image 
-                  source={require('../assets/icon/support.png')} 
-                  style={styles.buttonIcon} 
-                  resizeMode="contain" 
-                  accessibilityLabel="Clique aqui para acessar o suporte"
-                />
-                <Text>{focusedButton === 'support' ? 'FOCADO' : 'NÃO FOCADO'}</Text>
-                {/* <Text style={styles.buttonText}>Suporte</Text> */}
-              </View>
-              
-            </TouchableHighlight >
+          <View style={styles.buttons} focusable={true} onKeyDown={handleKeyDown}>
+             <Button
+               ref={playButtonRef}
+                onPress={navigateToProgram}
+                label="Iniciar Programação"
+                image={require('../assets/icon/button_play.png')}
+                hasTVPreferredFocus={true}
+                style={[styles.button, styles.firstButton]}
+              />
+              <Button
+                ref={supportButtonRef}
+                label="Suporte"
+                onPress={openAnyDesk}
+                image={require('../assets/icon/support.png')}
+                style={[styles.button]}
+              />
           </View>
         </View>
         <Image source={require('../assets/icon/borelli.png')} style={styles.logoIcon} resizeMode="cover"  />
@@ -187,8 +188,6 @@ const styles = StyleSheet.create({
     opacity: 1
  },
 content: {
-  maxHeight: '100vh',
-  maxWidth: '100vw',
   flex: 1,
   justifyContent: 'center',
   alignItems: 'center',
@@ -197,7 +196,26 @@ title: {
   fontSize: 36,
   fontWeight: 'bold',
   color: '#384c29',
-  textShadow: 'color offsetX offsetY blurRadius',
+  // textShadow property removed; use textShadowColor, textShadowOffset, textShadowRadius if needed
+},
+buttonFocus: {
+  elevation: 5,
+  opacity: 1
+},
+button: {
+  backgroundColor: '#836977',
+  padding: 15,
+  borderRadius: 30,
+  marginBottom: 20,
+  width: '49%',
+  height: 200,
+  alignItems: 'center',
+  justifyContent: 'center',
+  elevation: 4,
+  opacity: 0.5
+},
+firstButton: {
+  marginRight: 32
 },
 logoutButton: {
   position: 'absolute',
@@ -216,40 +234,13 @@ buttons:{
   alignItems: 'center',
   justifyContent: 'center'
 },
-firstButton: {
-  marginRight: 32
-},
-button: {
-  backgroundColor: '#836977',
-  padding: 15,
-  borderRadius: 30,
-  marginBottom: 20,
-  width: '49%',
-  height: 200,
-  alignItems: 'center',
-  justifyContent: 'center',
-  elevation: 4,
-  opacity: 0.5
-},
-buttonIcon: {
-  height: 54,
-  width: 54,
-  marginBottom: 18
-},
-buttonText: {
-  color: '#fff',
-  fontSize: 18,
-},
-buttonFocus: {
-  elevation: 5,
-  opacity: 1
-},
 logoIcon: {
   position: 'absolute',
   bottom: 40,
   right: 40,
   height: 100,
-  width:100,
+  width: 100,
+  // overflow property removed to avoid type error with ImageStyle
 },
 loadingMedias: {
   position: 'absolute',
@@ -257,14 +248,13 @@ loadingMedias: {
   color: '#836977',
   fontWeight: 'bold',
 },
+
 container: {
-  position: 'fixed',
+  // position: 'fixed', // Not supported in React Native
+  position: 'absolute',
   padding: 20,
   width: 280,
+  fontWeight: 'bold',
   bottom: 100
 },
-textLoading: {
-  color: '#836977',
-  fontWeight: 'bold'
-}
 });
