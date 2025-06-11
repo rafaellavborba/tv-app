@@ -13,6 +13,7 @@ export const fetchImages = createAsyncThunk<any, string, { rejectValue: fetchMed
                 headers: {
                 Authorization: "Bearer ee6d9123-3f88-4175-829f-6d08ca8810b8",
                 },
+            
             })
             if(data?.data?.length){
                 dispatch(setImages(data.data))
@@ -62,6 +63,7 @@ export const fetchDevice = createAsyncThunk<any, any, {rejectValue: fetchMediaEr
                 dispatch(setDevice(device.identifier))
             }
         } catch (error) {
+            
             console.error('Erro ao identificar o device: ', error)
         }
     }

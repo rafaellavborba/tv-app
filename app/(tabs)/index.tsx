@@ -13,7 +13,7 @@ export default function Index() {
   
   useEffect(() => {
     if(!deviceState){
-      const send = {identifier: Device.modelId || Device.modelName}
+      const send = {identifier: Device.osInternalBuildId || Device.modelName}
       dispatch(fetchDevice(send))
     }
   }, []);

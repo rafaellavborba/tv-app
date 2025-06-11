@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, 
   Text, 
-  TouchableOpacity, 
+  TouchableHighlight , 
   StyleSheet, 
   Linking, 
   Alert, 
@@ -94,7 +94,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
-        {/* <TouchableOpacity 
+        {/* <TouchableHighlight  
           nativeID={"1"}
           nextFocusDown={2}
           nextFocusLeft={3}
@@ -107,38 +107,52 @@ export default function HomeScreen() {
           accessibilityLabel="Clique aqui para sair da aplicação"
         >
           <Image source={require('../assets/icon/logout.png')} style={styles.iconLogout} />
-        </TouchableOpacity> */}
+        </TouchableHighlight > */}
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
           <View style={styles.buttons}>
             
-            <TouchableOpacity 
-              style={[styles.button, styles.firstButton, focusedButton === 'play' && styles.buttonFocus]} 
-              onPress={navigateToProgram} 
+            <TouchableHighlight 
+              style={[
+                styles.button,
+                styles.firstButton,
+                focusedButton === 'play' && styles.buttonFocus
+              ]}
+              onPress={navigateToProgram}
               onFocus={() => setFocusedButton('play')}
               hasTVPreferredFocus={true}
+              
               disabled={loading}
+              focusable={true}
             >
-              <Image 
-                source={require('../assets/icon/button_play.png')} 
-                style={styles.buttonIcon} 
-                accessibilityLabel="Iniciar a produção"
-              />
-              <Text style={styles.buttonText}>Iniciar Programação</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
+              <View>
+                <Image
+                  source={require('../assets/icon/button_play.png')}
+                  style={styles.buttonIcon}
+                  accessibilityLabel="Iniciar a produção"
+                />
+                <Text>{focusedButton === 'play' ? 'FOCADO' : 'NÃO FOCADO'}</Text>
+                {/* <Text style={styles.buttonText}>Iniciar Programação</Text> */}
+              </View>
+            </TouchableHighlight >
+            <TouchableHighlight
               style={[styles.button, focusedButton === 'support' && styles.buttonFocus]} 
               onPress={openAnyDesk} 
-              onFocus={() => setFocusedButton('support')}
+              onFocus={() => console.log('oii')}
+              focusable={true}
             >
-              <Image 
-                source={require('../assets/icon/support.png')} 
-                style={styles.buttonIcon} 
-                resizeMode="contain" 
-                accessibilityLabel="Clique aqui para acessar o suporte"
-              />
-              <Text style={styles.buttonText}>Suporte</Text>
-            </TouchableOpacity>
+              <View>
+                <Image 
+                  source={require('../assets/icon/support.png')} 
+                  style={styles.buttonIcon} 
+                  resizeMode="contain" 
+                  accessibilityLabel="Clique aqui para acessar o suporte"
+                />
+                <Text>{focusedButton === 'support' ? 'FOCADO' : 'NÃO FOCADO'}</Text>
+                {/* <Text style={styles.buttonText}>Suporte</Text> */}
+              </View>
+              
+            </TouchableHighlight >
           </View>
         </View>
         <Image source={require('../assets/icon/borelli.png')} style={styles.logoIcon} resizeMode="cover"  />
