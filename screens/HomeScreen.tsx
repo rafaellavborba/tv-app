@@ -23,12 +23,8 @@ import { Button } from '@/components/ui/Button';
 import { AccessibilityInfo } from 'react-native';
 import KeyEvent from 'react-native-keyevent';
 
-
 export default function HomeScreen() {
 
-  AccessibilityInfo.addEventListener('focusChanged', (isFocused) => {
-    console.log('Focus changed:', isFocused);
-  });
   const navigation = useNavigation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -42,14 +38,7 @@ export default function HomeScreen() {
       } else if (keyEvent.keyCode === 21) {
         // Esquerda
         setFocusedIndex((prev) => (prev - 1 + 2) % 2);
-      } else if (keyEvent.keyCode === 23) {
-        // Enter / OK
-        if (focusedIndex === 0) {
-          console.log('Play pressionado');
-        } else {
-          console.log('Suporte pressionado');
-        }
-      }
+      } 
     });
 
     return () => KeyEvent.removeKeyDownListener();
@@ -60,11 +49,9 @@ export default function HomeScreen() {
     syncAndCleanMedia, 
   } = useMedias()
 
-
   // const handleOpenPasswordModal = () => {
   //   setShowPasswordModal(true);
   // };
-
 
   useEffect(() => {
     const loadMedia = async () => {
@@ -99,26 +86,19 @@ export default function HomeScreen() {
       })
       .catch((err) => console.error('Erro ao abrir o AnyDesk:', err));
   };
-
-  const navigateToProgram = () => {
-    navigation.navigate('MediaScreen');
-  };
-
-
   const playButtonRef = useRef(null);
   const supportButtonRef = useRef(null);
 
-// const checkFocus = () => {
-//     const focusedField = TextInput.State.currentlyFocusedField();
-//     const playHandle = findNodeHandle(playButtonRef.current);
-//     const supportHandle = findNodeHandle(supportButtonRef.current);
+  const handlePressEnter = () => {
+    if(focusedIndex === 0){
+      navigation.navigate('MediaScreen');
+      return
+    }
+    if(focusedIndex === 1){
+      openAnyDesk()
+    }
+  }
   
-//   };
-
-  // useEffect(() => {
-  //   const interval = setInterval(checkFocus, 1000); 
-  //   return () => clearInterval(interval);
-  // }, []);
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
@@ -138,21 +118,24 @@ export default function HomeScreen() {
         </TouchableHighlight > */}
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
-          <View style={styles.buttons} focusable={true} onKeyDown={handleKeyDown}>
+          <View style={styles.buttons} focusable={true} >
              <Button
                ref={playButtonRef}
-                onPress={navigateToProgram}
+                onPress={handlePressEnter}
                 label="Iniciar Programação"
                 image={require('../assets/icon/button_play.png')}
                 hasTVPreferredFocus={true}
-                style={[styles.button, styles.firstButton]}
+                style={[styles.button, styles.firstButton, focusedIndex === 0 && styles.buttonFocus, ]}
+                hasTVPreferredFocus={true}
+                onFocus={() => setFocusedIndex(0)} 
               />
               <Button
+                onPress={handlePressEnter}
                 ref={supportButtonRef}
                 label="Suporte"
-                onPress={openAnyDesk}
                 image={require('../assets/icon/support.png')}
-                style={[styles.button]}
+                style={[styles.button, focusedIndex === 1 && styles.buttonFocus]}
+                hasTVPreferredFocus={true}
               />
           </View>
         </View>
@@ -196,7 +179,6 @@ title: {
   fontSize: 36,
   fontWeight: 'bold',
   color: '#384c29',
-  // textShadow property removed; use textShadowColor, textShadowOffset, textShadowRadius if needed
 },
 buttonFocus: {
   elevation: 5,
@@ -240,7 +222,6 @@ logoIcon: {
   right: 40,
   height: 100,
   width: 100,
-  // overflow property removed to avoid type error with ImageStyle
 },
 loadingMedias: {
   position: 'absolute',
@@ -250,7 +231,6 @@ loadingMedias: {
 },
 
 container: {
-  // position: 'fixed', // Not supported in React Native
   position: 'absolute',
   padding: 20,
   width: 280,

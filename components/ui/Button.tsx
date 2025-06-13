@@ -43,7 +43,8 @@ export const Button = React.forwardRef<React.ElementRef<typeof Pressable>, Butto
               props.style
             ]}
             ref={ref}
-            // hasTVPreferredFocus={props.hasTVPreferredFocus || false}
+            hasTVPreferredFocus={props.hasTVPreferredFocus || false}
+            onFocus={props.onFocus} 
             // nextFocusUp={props.nextFocusUp}
             // nextFocusDown={props.nextFocusDown}
             // nextFocusLeft={props.nextFocusLeft}

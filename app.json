@@ -35,8 +35,7 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "react-native-video",
-      "@react-native-tvos/config-tv"
+      "react-native-video"
     ],
     "experiments": {
       "typedRoutes": true
@@ -48,6 +47,7 @@
       "eas": {
         "projectId": "cc79e01a-c62f-4c12-9bb7-db02cfd180ce"
       }
-    }
+    },
+    "owner": "rafaellavborba"
   }
 }
