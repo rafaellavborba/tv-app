@@ -12,7 +12,7 @@ import {
   Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import ModalPassword from '@/components/ModalPassword';
+import ModalPassword from '@/components/ModalPassword';
 import { useDispatch } from "react-redux";
 import { fetchImages, fetchVideos } from '@/store/requestsActions';
 import { AppDispatch } from '@/store/store';
@@ -22,36 +22,39 @@ import TypingLoop from '@/hooks/TypingLoop';
 import { Button } from '@/components/ui/Button';
 import { AccessibilityInfo } from 'react-native';
 import KeyEvent from 'react-native-keyevent';
-
+import { BackHandler } from 'react-native';
+import { useKeyNavigation } from '../utils/useKeyNavigation';
 export default function HomeScreen() {
 
   const navigation = useNavigation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-    const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const focusRef = useRef(focusedIndex);
+  focusRef.current = focusedIndex;
 
+  useKeyNavigation({
+    getFocus: () => focusRef.current,
+    setFocus: setFocusedIndex
+  });
   useEffect(() => {
-    KeyEvent.onKeyDownListener((keyEvent) => {
-      if (keyEvent.keyCode === 22) {
-        // Direita
-        setFocusedIndex((prev) => (prev + 1) % 2);
-      } else if (keyEvent.keyCode === 21) {
-        // Esquerda
-        setFocusedIndex((prev) => (prev - 1 + 2) % 2);
-      } 
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => true 
+    );
 
-    return () => KeyEvent.removeKeyDownListener();
-  }, [focusedIndex]);
+    return () => backHandler.remove();
+  }, []);
+
   const {
     loading,  
     setLoading, 
     syncAndCleanMedia, 
   } = useMedias()
 
-  // const handleOpenPasswordModal = () => {
-  //   setShowPasswordModal(true);
-  // };
+  const handleOpenPasswordModal = () => {
+    setShowPasswordModal(true);
+  };
 
   useEffect(() => {
     const loadMedia = async () => {
@@ -90,32 +93,30 @@ export default function HomeScreen() {
   const supportButtonRef = useRef(null);
 
   const handlePressEnter = () => {
-    if(focusedIndex === 0){
-      navigation.navigate('MediaScreen');
-      return
-    }
-    if(focusedIndex === 1){
-      openAnyDesk()
+    switch (focusedIndex) {
+      case 0:
+        navigation.navigate('MediaScreen');
+        break;
+      case 1: 
+        openAnyDesk()
+        break;
+      case 2:
+        handleOpenPasswordModal()
+      default:
+        break;
     }
   }
   
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
-        {/* <TouchableHighlight  
-          nativeID={"1"}
-          nextFocusDown={2}
-          nextFocusLeft={3}
-          nextFocusRight={2}
-          nextFocusUp={2}
-          onPress={handleOpenPasswordModal}
-          onFocus={() => setFocusedButton('logout')}
-          
-          accessibilityRole="button" 
-          accessibilityLabel="Clique aqui para sair da aplicação"
-        >
-          <Image source={require('../assets/icon/logout.png')} style={styles.iconLogout} />
-        </TouchableHighlight > */}
+        <Button 
+            onPress={handlePressEnter}
+            label=''
+            image={require('../assets/icon/logout.png')}
+            hasTVPreferredFocus={true}
+            style={[styles.logoutButton, focusedIndex === 2 && styles.buttonFocus]}
+        />
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
           <View style={styles.buttons} focusable={true} >
@@ -126,8 +127,6 @@ export default function HomeScreen() {
                 image={require('../assets/icon/button_play.png')}
                 hasTVPreferredFocus={true}
                 style={[styles.button, styles.firstButton, focusedIndex === 0 && styles.buttonFocus, ]}
-                hasTVPreferredFocus={true}
-                onFocus={() => setFocusedIndex(0)} 
               />
               <Button
                 onPress={handlePressEnter}
@@ -143,10 +142,10 @@ export default function HomeScreen() {
         {(loading && <TypingLoop style={styles.loadingMedias} />
         ) }
       </ImageBackground>
-      {/* {showPasswordModal 
+      {showPasswordModal 
         ? (<ModalPassword showPasswordModal={showPasswordModal} setShowPasswordModal={setShowPasswordModal}/> ) 
         : null
-      } */}
+      }
     </View>
   );
 }
@@ -202,7 +201,8 @@ firstButton: {
 logoutButton: {
   position: 'absolute',
   top: 40,
-  left: 40
+  left: 40,
+  opacity: 0.5
 },
 iconLogout: {
   height: 42,
