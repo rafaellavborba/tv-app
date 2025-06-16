@@ -2,16 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   View, 
   Text, 
-  TouchableHighlight , 
   StyleSheet, 
   Linking, 
   Alert, 
   ImageBackground, 
   Image,
   findNodeHandle,
-  Platform
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import ModalPassword from '@/components/ModalPassword';
 import { useDispatch } from "react-redux";
 import { fetchImages, fetchVideos } from '@/store/requestsActions';
@@ -24,8 +23,13 @@ import { AccessibilityInfo } from 'react-native';
 import KeyEvent from 'react-native-keyevent';
 import { BackHandler } from 'react-native';
 import { useKeyNavigation } from '../utils/useKeyNavigation';
-export default function HomeScreen() {
+import { Platform } from 'react-native';
+import { Pressable } from 'react-native';
 
+export default function HomeScreen() {
+  const playButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
+  const supportButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
+  const logoutButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
   const navigation = useNavigation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -37,14 +41,17 @@ export default function HomeScreen() {
     getFocus: () => focusRef.current,
     setFocus: setFocusedIndex
   });
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => true 
-    );
+ useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        return true; 
+      };
 
-    return () => backHandler.remove();
-  }, []);
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const {
     loading,  
@@ -89,8 +96,6 @@ export default function HomeScreen() {
       })
       .catch((err) => console.error('Erro ao abrir o AnyDesk:', err));
   };
-  const playButtonRef = useRef(null);
-  const supportButtonRef = useRef(null);
 
   const handlePressEnter = () => {
     switch (focusedIndex) {
@@ -106,17 +111,89 @@ export default function HomeScreen() {
         break;
     }
   }
-  
+  const focusElement = (ref: React.MutableRefObject<null>) => {
+    const node = findNodeHandle(ref?.current);
+    if (node) {
+      AccessibilityInfo.setAccessibilityFocus(node);
+    }
+  };
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (focusedIndex === 0) focusElement(playButtonRef);
+      if (focusedIndex === 1) focusElement(supportButtonRef);
+      if (focusedIndex === 2) focusElement(logoutButtonRef);
+    }, 100); 
+
+    return () => clearTimeout(timeout);
+  }, [focusedIndex]);
+
+  useEffect(() => {
+    if (
+      Platform.OS === 'android' &&
+      playButtonRef.current &&
+      supportButtonRef.current &&
+      logoutButtonRef.current
+    ) {
+      const playId = findNodeHandle(playButtonRef.current);
+      const supportId = findNodeHandle(supportButtonRef.current);
+      const logoutId = findNodeHandle(logoutButtonRef.current);
+
+      playButtonRef.current.setNativeProps({
+        nextFocusRight: supportId,
+        nextFocusUp: logoutId,
+      });
+
+      supportButtonRef.current.setNativeProps({
+        nextFocusLeft: playId,
+        nextFocusUp: logoutId,
+      });
+
+      logoutButtonRef.current.setNativeProps({
+        nextFocusDown: playId,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+  if (focusedIndex === 0) {
+    playButtonRef.current?.setNativeProps({
+      style: {
+        opacity: 1,
+        elevation: 5
+      },
+    });
+    supportButtonRef.current?.setNativeProps({
+      style: {
+        opacity: 0.5,
+        elevation: 1
+      }
+    })
+  } else {
+    playButtonRef.current?.setNativeProps({
+      style: {
+        opacity: 0.5,
+        elevation: 1
+      },
+    });
+     supportButtonRef.current?.setNativeProps({
+      style: {
+        opacity: 1,
+        elevation: 5
+      }
+    })
+  }
+}, [focusedIndex]);
   return (
     <View style={styles.content}>
       <ImageBackground style={styles.backgroundImage} source={require('../assets/images/fundo_login.jpg')} resizeMode="cover">
-        <Button 
+        {/* <Button 
+            ref={logoutButtonRef}
             onPress={handlePressEnter}
             label=''
             image={require('../assets/icon/logout.png')}
-            hasTVPreferredFocus={true}
+            hasTVPreferredFocus={false}
             style={[styles.logoutButton, focusedIndex === 2 && styles.buttonFocus]}
-        />
+        /> */}
         <View style={styles.launcher}>
           <Text style={styles.title}>Bem-vindo a TV Borelli</Text>
           <View style={styles.buttons} focusable={true} >
@@ -134,7 +211,7 @@ export default function HomeScreen() {
                 label="Suporte"
                 image={require('../assets/icon/support.png')}
                 style={[styles.button, focusedIndex === 1 && styles.buttonFocus]}
-                hasTVPreferredFocus={true}
+                hasTVPreferredFocus={false}
               />
           </View>
         </View>
@@ -142,10 +219,10 @@ export default function HomeScreen() {
         {(loading && <TypingLoop style={styles.loadingMedias} />
         ) }
       </ImageBackground>
-      {showPasswordModal 
+      {/* {showPasswordModal 
         ? (<ModalPassword showPasswordModal={showPasswordModal} setShowPasswordModal={setShowPasswordModal}/> ) 
         : null
-      }
+      } */}
     </View>
   );
 }

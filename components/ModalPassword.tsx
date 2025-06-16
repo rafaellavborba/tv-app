@@ -4,8 +4,7 @@ import { useKeyNavigation } from "@/utils/useKeyNavigation";
 export default function ModalPassword({ showPasswordModal, setShowPasswordModal }: any) {
   const [password, setPassword] = useState('');
   const [focusedIndex, setFocusedIndex] = useState(0);
-
-
+  
     const passwordRef = useRef(null);
     const confirmButtonRef = useRef(null);
     const cancelButtonRef = useRef(null);

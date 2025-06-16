@@ -26,7 +26,6 @@ type ButtonProps = React.ComponentProps<typeof Pressable> & {
   onPress?: () => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
-
   onFocus?: () => void;
   hasTVPreferredFocus?: boolean;
   nextFocusUp?: number;
@@ -45,10 +44,8 @@ export const Button = React.forwardRef<React.ElementRef<typeof Pressable>, Butto
             ref={ref}
             hasTVPreferredFocus={props.hasTVPreferredFocus || false}
             onFocus={props.onFocus} 
-            // nextFocusUp={props.nextFocusUp}
-            // nextFocusDown={props.nextFocusDown}
-            // nextFocusLeft={props.nextFocusLeft}
-            // nextFocusRight={props.nextFocusRight}
+            accessible={true}
+            focusable={true}
           >
               <View>
                 <Image
