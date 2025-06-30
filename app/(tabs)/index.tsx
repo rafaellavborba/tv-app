@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 export default function Index() {
   const dispatch = useDispatch<AppDispatch>();
-  const { deviceState } = useAppSelector((state) => state.requests.deviceState);
+  const { deviceState } = useAppSelector((state) => state.requests);
   
   useEffect(() => {
     if(!deviceState){

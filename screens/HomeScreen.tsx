@@ -25,12 +25,15 @@ import { BackHandler } from 'react-native';
 import { useKeyNavigation } from '../utils/useKeyNavigation';
 import { Platform } from 'react-native';
 import { Pressable } from 'react-native';
+import { useAppSelector } from '@/store/hooks';
 
 export default function HomeScreen() {
   const playButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
   const supportButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
   const logoutButtonRef = useRef<null | React.ElementRef<typeof Pressable>>(null);
   const navigation = useNavigation();
+  const { deviceState } = useAppSelector((state) => state.requests);
+
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -67,13 +70,12 @@ export default function HomeScreen() {
     const loadMedia = async () => {
       try {
         setLoading(true);
-        const imageRes = await dispatch(fetchImages());
-        const videoRes = await dispatch(fetchVideos());
-        const allUrls = [
-          ...imageRes.payload.map((img: any) => img.url),
-          ...videoRes.payload.map((vid: any) => vid.url)
-        ];
-        const localUris = await syncAndCleanMedia(allUrls);
+        // const imageRes = await dispatch(fetchImages());
+        const {payload} = await dispatch(fetchVideos());
+        const allUrls = JSON.parse(payload);
+        if(allUrls?.length){
+          await syncAndCleanMedia(allUrls);
+        }
         
       } catch (error) {
         console.error("Erro ao carregar mídias:", error);
@@ -81,8 +83,12 @@ export default function HomeScreen() {
         setLoading(false);
       }
     };
-    loadMedia();
-  }, [dispatch]);
+    if(deviceState){
+      loadMedia();
+      
+    }
+    console.log("Estado do dispositivo:", deviceState);
+  }, [deviceState]);
 
   const openAnyDesk = () => {
     const anydeskURL = 'anydesk://';

@@ -9,7 +9,7 @@ export const fetchImages = createAsyncThunk<any, string, { rejectValue: fetchMed
     "fetchImages",
     async(_, {dispatch, rejectValue}) => {
         try{
-            const {data} = await axios.get(`https://ibucket.gelatoborelli.com.br/painel_tv/?type=images`, {
+            const {data} = await axios.get(`https://apiptv.gelatoborelli.com.br/api/tv/${deviceState}`, {
                 headers: {
                 Authorization: "Bearer ee6d9123-3f88-4175-829f-6d08ca8810b8",
                 },
@@ -30,38 +30,35 @@ export const fetchImages = createAsyncThunk<any, string, { rejectValue: fetchMed
 )   
 export const fetchVideos = createAsyncThunk<any, string, { rejectValue: fetchMediaError }>(
     "fetchVideos",
-    async(_, {dispatch, rejectValue}) => {
+    async(_, {dispatch, getState}) => {
         try{
-            const {data} = await axios.get(`https://ibucket.gelatoborelli.com.br/painel_tv/?type=videos`, {
+            const { requests } = getState();
+            const {deviceState} = requests
+            const {data} = await axios.get(`https://apiptv.gelatoborelli.com.br/api/tv/${deviceState}`, {
                 headers: {
-                Authorization: "Bearer ee6d9123-3f88-4175-829f-6d08ca8810b8",
+                    Authorization: "ee6d9123-3f88-4175-829f-6d08ca8810b8",
                 },
             })
-            if(data?.data?.length){
-                dispatch(setVideos(data.data))
-                return data.data
+            if(data?.playlist?.length){
+                dispatch(setVideos(data.playlist))
+                return data.playlist
             }
             return []
         } catch(e){
             console.error("Erro ao buscar vídeos:", e);
-            return rejectValue({
-                message: 'Erro: ' + axios.isAxiosError(e) ? Error.message: 'Erro desconhecido'
-            })
         }
     }
 )   
 export const fetchDevice = createAsyncThunk<any, any, {rejectValue: fetchMediaError}>(
     "fetchDevice", 
-    async(device, {dispatch, rejectValue}) => {
+    async(device, {dispatch}) => {
         try {
+            dispatch(setDevice(device.identifier))
             const {data} = await axios.post(`https://apiptv.gelatoborelli.com.br/api/device_tv`, device, {
                 headers: {
                     Authorization: "ee6d9123-3f88-4175-829f-6d08ca8810b8",
                 },
             })
-            if (data) {
-                dispatch(setDevice(device.identifier))
-            }
         } catch (error) {
             
             console.error('Erro ao identificar o device: ', error)

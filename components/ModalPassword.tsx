@@ -46,9 +46,9 @@ export default function ModalPassword({ showPasswordModal, setShowPasswordModal 
             handleClosePasswordModal()
             break;
         
-        case 2:
-            console.log('input')
-            break
+        // case 2:
+        //     console.log('input')
+        //     break
         default:
             break;
     }

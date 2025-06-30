@@ -23,14 +23,14 @@ export function useMedias() {
         }
     };
 
-    const syncAndCleanMedia = async (mediaUrls: string[]) => {
+    const syncAndCleanMedia = async (mediaUrls: any[]) => {
         setTotalFilesToDownload(0);
         setFilesDownloaded(0);
         setDownloadProgress(0);
         setLoading(true);
         const dir = FileSystem.documentDirectory!;
         const localFiles = await FileSystem.readDirectoryAsync(dir);
-        const expectedFilenames = mediaUrls.map(url => url.split('filename=').pop());
+        const expectedFilenames = mediaUrls?.length ? mediaUrls.map(media => media?.url.split('filename=').pop()): [];
         const filesToDownload = [];
         
         for (const file of localFiles) {
@@ -43,12 +43,12 @@ export function useMedias() {
             }
         }
 
-        for (const url of mediaUrls) {
-            const filename = url.split('filename=').pop();
+        for (const media of mediaUrls) {
+            const filename = media?.url?.split('filename=').pop();
             const finalPath = `${FileSystem.documentDirectory}${filename}`;
             const fileInfo = await FileSystem.getInfoAsync(finalPath);
             if (!fileInfo.exists) {
-                filesToDownload.push({ url, finalPath, filename });
+                filesToDownload.push({ url: media.url, finalPath, filename });
             }
         }
         setTotalFilesToDownload(filesToDownload.length);

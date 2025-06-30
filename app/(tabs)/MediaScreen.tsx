@@ -19,6 +19,7 @@ const MediaScreen = () => {
   const buscarMidias = async () => {
     try {
       const midias = await getAllSavedMedia();
+      console.log('Mídias locais encontradas:', midias);
       setMidiasLocais(midias);
     } catch (error) {
       console.error('Erro ao buscar mídias:', error);
@@ -76,7 +77,6 @@ const MediaScreen = () => {
   const isImage = (uri: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(uri);
 
   const currentUri = midiasLocais[currentIndex];
-
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={1}>
       {loading || !midiasLocais.length ? (
