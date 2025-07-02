@@ -20,7 +20,6 @@ import TypingLoop from '@/hooks/TypingLoop';
 // import {Animated} from 'react-native'
 import { Button } from '@/components/ui/Button';
 import { AccessibilityInfo } from 'react-native';
-import KeyEvent from 'react-native-keyevent';
 import { BackHandler } from 'react-native';
 import { useKeyNavigation } from '../utils/useKeyNavigation';
 import { Platform } from 'react-native';
@@ -39,19 +38,19 @@ export default function HomeScreen() {
   const [focusedIndex, setFocusedIndex] = useState(0);
   const focusRef = useRef(focusedIndex);
   focusRef.current = focusedIndex;
-
   useKeyNavigation({
     getFocus: () => focusRef.current,
     setFocus: setFocusedIndex
   });
+
  useFocusEffect(
     useCallback(() => {
+
       const onBackPress = () => {
         return true; 
       };
 
       BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
       return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     }, [])
   );
@@ -72,7 +71,7 @@ export default function HomeScreen() {
         setLoading(true);
         // const imageRes = await dispatch(fetchImages());
         const {payload} = await dispatch(fetchVideos());
-        const allUrls = JSON.parse(payload);
+        const allUrls = payload && typeof payload === 'string' ? JSON.parse(payload) : payload;
         if(allUrls?.length){
           await syncAndCleanMedia(allUrls);
         }
@@ -129,7 +128,6 @@ export default function HomeScreen() {
       if (focusedIndex === 1) focusElement(supportButtonRef);
       if (focusedIndex === 2) focusElement(logoutButtonRef);
     }, 100); 
-
     return () => clearTimeout(timeout);
   }, [focusedIndex]);
 

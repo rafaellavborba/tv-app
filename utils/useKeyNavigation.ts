@@ -16,9 +16,9 @@ const keyCodes = {
 
 export function useKeyNavigation({ getFocus, setFocus }: KeyNavigationProps) {
   useEffect(() => {
+    
     const handleKeyDown = (keyEvent: { keyCode: number }) => {
       const focusedIndex = getFocus();
-
       switch (keyEvent.keyCode) {
         case keyCodes.right:
           if (focusedIndex === 0) setFocus(1);
@@ -43,7 +43,6 @@ export function useKeyNavigation({ getFocus, setFocus }: KeyNavigationProps) {
     };
 
     KeyEvent.onKeyDownListener(handleKeyDown);
-
     return () => {
       KeyEvent.removeKeyDownListener();
     };
