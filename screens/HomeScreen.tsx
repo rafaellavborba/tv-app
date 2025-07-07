@@ -42,7 +42,7 @@ export default function HomeScreen() {
     getFocus: () => focusRef.current,
     setFocus: setFocusedIndex
   });
-
+  
  useFocusEffect(
     useCallback(() => {
 
